@@ -32,7 +32,7 @@ time:
               then:
                 - light.turn_on:
                     id: abfallneo
-                    effect: scan
+                    effect: pulse
                     red: !lambda 'return id(lampe) * (id(fehler) * 1 +id(arest) * 1  + id(agelb) * 1);'
                     blue: !lambda 'return id(lampe) * (id(fehler) * 1 +id(apapier) * 1 );'
                     green: !lambda 'return id(lampe) * (id(fehler) * 1 +id(abio) * 1 + id(agelb) * 1 );'
