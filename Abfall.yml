@@ -1,0 +1,156 @@
+esphome:
+  name: abfall
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi: !include secrets.yaml
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+captive_portal:
+
+time:
+  - platform: homeassistant
+
+sun:
+  latitude: 51.14°
+  longitude: 9.414°
+
+globals:
+  - id: arest
+    type: bool
+    initial_value: false
+  - id: abio
+    type: bool
+    initial_value: false
+  - id: apapier
+    type: bool
+    initial_value: false
+  - id: agelb
+    type: bool
+    initial_value: false
+
+
+sensor:
+  - platform: homeassistant
+    id: abfall1
+    internal: true
+    entity_id: sensor.abfallnaechster
+    on_value_range:
+      - below: 5
+        then:
+          - light.turn_on:
+              id: abfallneo
+              effect: scan
+
+
+text_sensor:
+  - platform: homeassistant
+    id: abfall2
+    internal: true
+    entity_id: sensor.abfallnaechstertext
+    on_value:
+      then:
+      
+
+i2c:
+  sda: D2
+  scl: D1
+
+display:
+  - platform: lcd_pcf8574
+    dimensions: 16x2
+    address: 0x27
+    lambda: |-
+      it.printf(0,0,"%f", id(abfall1).state);
+      it.print(0,1, id(abfall2).state);
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: D6
+    num_leds: 3
+    name: "Abfall NeoPix"
+    id: abfallneo
+    effects:
+      - random:
+      - pulse:
+      - strobe:
+      - flicker:
+      - addressable_rainbow:
+      - addressable_color_wipe:
+      - addressable_scan:
+      - addressable_twinkle:
+      - addressable_random_twinkle:
+      - addressable_fireworks:
+      - addressable_flicker:
+
+
+
+# binary_sensor:
+  # - platform: gpio
+    # pin: D1
+    # name: "Luna PIR"
+    # device_class: motion
+    # id: lunapir
+    # on_press:
+      # then:
+        # - if:
+            # condition:
+# #              - sun.is_below_horizon:  
+               # sensor.in_range:
+                 # id: lunafoto
+# # 10 hat ganz gut gepasst.
+                 # above: 0.00
+            # then:
+              # - light.turn_on: 
+                  # id: lunaneo
+                  # effect: scan
+              # - delay: 120s
+              # - light.turn_off: lunaneo
+
+# sensor:
+  # - platform: adc
+    # pin: A0
+    # name: "LunaFoto"
+    # update_interval: 60s
+    # id: lunafoto
+
+
+
+    
+#switch:
+#  - platform: gpio
+#    name: "lene-Schalter"
+#    pin: D7
+    
+#dallas:
+#  - pin: D6
+  
+#sensor:
+#  - platform: dallas
+#    index: 0
+#    name: "Mega-temp"
+#    id: megatemp
+#  - platform: dht
+#    pin: D5
+#    temperature:
+#      name: "lene-temp"
+#      id: lenetemp
+#    humidity:
+#      name: "lene-humidity"
+#      id: lenehumi
+#    update_interval: 60s
+    
+
