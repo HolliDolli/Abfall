@@ -164,55 +164,48 @@ text_sensor:
           
 #              lambda: 'return (x.c_str() == "Restmuell");'
 
-i2c:
-  sda: D2
-  scl: D1
+# i2c:
+  # sda: D2
+  # scl: D1
 
-display:
-  - platform: lcd_pcf8574
-    dimensions: 16x2
-    address: 0x27
-    lambda: |-
-      it.printf(0,0,"%f", id(abfall1).state);
-      if (id(lampe)) {
-        it.print(10,0, "1");
-      } else {
-        it.print(10,0, "0");
-      }
-      if (id(fehler)) {
-        it.print(11,0, "1");
-      } else {
-        it.print(11,0, "0");
-      }
-      if (id(arest)) {
-        it.print(12,0, "1");
-      } else {
-        it.print(12,0, "0");
-      }
-      if (id(abio)) {
-        it.print(13,0, "1");
-      } else {
-        it.print(13,0, "0");
-      }
-      if (id(apapier)) {
-        it.print(14,0, "1");
-      } else {
-        it.print(14,0, "0");
-      }
-      if (id(agelb)) {
-        it.print(15,0, "1");
-      } else {
-        it.print(15,0, "0");
-      }
-      it.print(0,1, id(abfall2).state);
+# display:
+  # - platform: lcd_pcf8574
+    # dimensions: 16x2
+    # address: 0x27
+    # lambda: |-
+      # it.printf(0,0,"%f", id(abfall1).state);
+      # if (id(lampe)) {
+        # it.print(10,0, "1");
+      # } else {
+        # it.print(10,0, "0");
+      # }
+      # if (id(fehler)) {
+        # it.print(11,0, "1");
+      # } else {
+        # it.print(11,0, "0");
+      # }
+      # if (id(arest)) {
+        # it.print(12,0, "1");
+      # } else {
+        # it.print(12,0, "0");
+      # }
+      # if (id(abio)) {
+        # it.print(13,0, "1");
+      # } else {
+        # it.print(13,0, "0");
+      # }
+      # if (id(apapier)) {
+        # it.print(14,0, "1");
+      # } else {
+        # it.print(14,0, "0");
+      # }
+      # if (id(agelb)) {
+        # it.print(15,0, "1");
+      # } else {
+        # it.print(15,0, "0");
+      # }
+      # it.print(0,1, id(abfall2).state);
 
-#      it.printf(14,0,"%d", abio);
-#      it.printf(15,0,"%d", apapier);
-#      it.printf(16,0,"%d", agelb);
-
-#      it.print(15,0, abio);
-#      it.print(17,0, apapier);
-#      it.print(19,0, agelb);
 
 
 
@@ -221,7 +214,7 @@ light:
     type: GRB
     variant: WS2812
     pin: D6
-    num_leds: 3
+    num_leds: 8
     name: "Abfall NeoPix"
     id: abfallneo
     effects:
