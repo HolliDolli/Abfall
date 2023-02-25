@@ -1,0 +1,44 @@
+esphome:
+  name: test
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi: !include secrets.yaml
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+captive_portal:
+
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: D6
+    num_leds: 8
+    name: "Test NeoPix"
+    id: testneo
+    effects:
+      - random:
+      - pulse:
+      - strobe:
+      - flicker:
+      - addressable_rainbow:
+      - addressable_color_wipe:
+      - addressable_scan:
+      - addressable_twinkle:
+      - addressable_random_twinkle:
+      - addressable_fireworks:
+      - addressable_flicker:
+
+
