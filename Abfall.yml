@@ -23,9 +23,24 @@ time:
   - platform: homeassistant
     id: zeit
     on_time:
+      - seconds: 30
+        minutes: /5
+        then:
+          - if:
+              condition:
+                light.is_off: abfallneo
+              then:
+                - light.turn_on:
+                    id: abfallneo
+                    brightness: 100%
+                    red: 1
+                    blue: 1
+                    green: 1
+                - delay: 3s    
+                - light.turn_off:
+                    id: abfallneo
       - seconds: 0
         minutes: /5
-#      hours: 17
         then:
           - lambda: |-
               int lz;
@@ -79,52 +94,13 @@ time:
                     case 29 ... 36 : call.set_effect("none");
                     default : call.set_effect("none");
                     call.perform();
+                    id(lampe) = true;
                   }
               } else {
                   auto call = id(abfallneo).turn_off();
                   call.perform();
+                  id(lampe) = false;
               }
-          # - if:
-              # condition:
-                # lambda: 'return id(lampe);'
-              # then:
-                # - light.turn_on:
-                    # id: abfallneo
-                    # red: !lambda 'return id(lampe) * (id(fehler) * 1 +id(arest) * 1  + id(agelb) * 1);'
-                    # blue: !lambda 'return id(lampe) * (id(fehler) * 1 +id(apapier) * 1 );'
-                    # green: !lambda 'return id(lampe) * (id(fehler) * 1 +id(abio) * 1 + id(agelb) * 1 );'
-                    # effect: !lambda |-
-                      # int i;
-                      # i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
-                      # switch (i) {
-                        # case 0 ... 12 : return std::string("none");
-                        # case 13 ... 18 : return std::string("scan");
-                        # case 19 ... 28 : return std::string("pulse");
-                        # case 29 ... 48 : return std::string("none");
-                        # default : return std::string("none");
-                      # }
-                    # brightness: !lambda |-
-                      # int i;
-                      # i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
-                      # switch (i) {
-                        # case 0 ... 12 : return 0.01;
-                        # default : return 1.00;
-                      # }
-              # else:
-                # - light.turn_on:
-                    # id: abfallneo
-                    # brightness: 100%
-                    # red: 1
-                    # blue: 1
-                    # green: 1
-                # - delay: 3s    
-                # - light.turn_off:
-                    # id: abfallneo
-
-
-# i = (id(abfall1).state * 24) + (24 - id(zeit).hour);
-#+ (24 - id(zeit).hour())
-
 
 
 sun:
@@ -132,25 +108,9 @@ sun:
   longitude: 9.414°
 
 globals:
-  - id: arest
-    type: bool
-    initial_value: 'false'
-  - id: abio
-    type: bool
-    initial_value: 'false'
-  - id: apapier
-    type: bool
-    initial_value: 'false'
-  - id: agelb
-    type: bool
-    initial_value: 'false'
-  - id: fehler
-    type: bool
-    initial_value: 'false'
   - id: lampe
     type: bool
-    initial_value: 'true'
-
+    initial_value: 'false'
 
 
 sensor:
@@ -170,141 +130,6 @@ sensor:
     id: abfallnxtr
     internal: true
     entity_id: sensor.abfallnxtr
-  - platform: homeassistant
-    id: abfall1
-    internal: true
-    entity_id: sensor.abfallnaechster
-    force_update: true
-    on_value_range:
-      - below: 1.5
-        then:
-          - globals.set:
-              id: lampe
-              value: 'true'
-      - above: 1.5
-        then:
-          - globals.set:
-              id: lampe
-              value: 'false'
-
-
-text_sensor:
-  - platform: homeassistant
-    id: abfall2
-    internal: true
-    entity_id: sensor.abfallnaechstertext
-    on_value:
-      then:
-        - globals.set:
-            id: arest
-            value: 'false'
-        - globals.set:
-            id: abio
-            value: 'false'
-        - globals.set:
-            id: apapier
-            value: 'false'
-        - globals.set:
-            id: agelb
-            value: 'false'
-        - globals.set:
-            id: fehler
-            value: 'true'
-        - if:
-            condition:
-              text_sensor.state:
-                id: abfall2
-                state: "['Restmuell']"
-            then:
-              - globals.set:
-                  id: arest
-                  value: 'true'
-              - globals.set:
-                  id: fehler
-                  value: 'false'
-        - if:
-            condition:
-              text_sensor.state:
-                id: abfall2
-                state: "['Biomuell']"
-            then:
-              - globals.set:
-                  id: abio
-                  value: 'true'
-              - globals.set:
-                  id: fehler
-                  value: 'false'
-        - if:
-            condition:
-              text_sensor.state:
-                id: abfall2
-                state: "['Altpapier']"
-            then:
-              - globals.set:
-                  id: apapier
-                  value: 'true'
-              - globals.set:
-                  id: fehler
-                  value: 'false'
-        - if:
-            condition:
-              text_sensor.state:
-                id: abfall2
-                state: "['Gelbe']"
-            then:
-              - globals.set:
-                  id: agelb
-                  value: 'true'
-              - globals.set:
-                  id: fehler
-                  value: 'false'
-          
-#              lambda: 'return (x.c_str() == "Restmuell");'
-
-# i2c:
-  # sda: D2
-  # scl: D1
-
-# display:
-  # - platform: lcd_pcf8574
-    # dimensions: 16x2
-    # address: 0x27
-    # lambda: |-
-      # it.printf(0,0,"%f", id(abfall1).state);
-      # if (id(lampe)) {
-        # it.print(10,0, "1");
-      # } else {
-        # it.print(10,0, "0");
-      # }
-      # if (id(fehler)) {
-        # it.print(11,0, "1");
-      # } else {
-        # it.print(11,0, "0");
-      # }
-      # if (id(arest)) {
-        # it.print(12,0, "1");
-      # } else {
-        # it.print(12,0, "0");
-      # }
-      # if (id(abio)) {
-        # it.print(13,0, "1");
-      # } else {
-        # it.print(13,0, "0");
-      # }
-      # if (id(apapier)) {
-        # it.print(14,0, "1");
-      # } else {
-        # it.print(14,0, "0");
-      # }
-      # if (id(agelb)) {
-        # it.print(15,0, "1");
-      # } else {
-        # it.print(15,0, "0");
-      # }
-      # it.print(0,1, id(abfall2).state);
-
-
-
 
 light:
   - platform: neopixelbus
@@ -326,63 +151,16 @@ light:
       - addressable_random_twinkle:
       - addressable_fireworks:
       - addressable_flicker:
-          
 
+# i2c:
+  # sda: D2
+  # scl: D1
 
+# display:
+  # - platform: lcd_pcf8574
+    # dimensions: 16x2
+    # address: 0x27
+    # lambda: |-
+      # it.printf(0,0,"%f", id(abfallnxta).state);
 
-# binary_sensor:
-  # - platform: gpio
-    # pin: D1
-    # name: "Luna PIR"
-    # device_class: motion
-    # id: lunapir
-    # on_press:
-      # then:
-        # - if:
-            # condition:
-# #              - sun.is_below_horizon:  
-               # sensor.in_range:
-                 # id: lunafoto
-# # 10 hat ganz gut gepasst.
-                 # above: 0.00
-            # then:
-              # - light.turn_on: 
-                  # id: lunaneo
-                  # effect: scan
-              # - delay: 120s
-              # - light.turn_off: lunaneo
-
-# sensor:
-  # - platform: adc
-    # pin: A0
-    # name: "LunaFoto"
-    # update_interval: 60s
-    # id: lunafoto
-
-
-
-    
-#switch:
-#  - platform: gpio
-#    name: "lene-Schalter"
-#    pin: D7
-    
-#dallas:
-#  - pin: D6
-  
-#sensor:
-#  - platform: dallas
-#    index: 0
-#    name: "Mega-temp"
-#    id: megatemp
-#  - platform: dht
-#    pin: D5
-#    temperature:
-#      name: "lene-temp"
-#      id: lenetemp
-#    humidity:
-#      name: "lene-humidity"
-#      id: lenehumi
-#    update_interval: 60s
-    
 
