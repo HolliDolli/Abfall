@@ -25,7 +25,7 @@ light:
     type: GRB
     variant: WS2812
     pin: D6
-    num_leds: 8
+    num_leds: 3
     name: "Test NeoPix"
     id: testneo
     effects:

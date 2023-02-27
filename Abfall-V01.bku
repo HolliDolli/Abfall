@@ -27,99 +27,42 @@ time:
         minutes: /5
 #      hours: 17
         then:
-          - lambda: |-
-              int lz;
-              int lza;
-              int lzb;
-              int lzg;
-              int lzr;
-              int colR;
-              int colG;
-              int colB;
-              lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
-              lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
-              lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
-              lzr = (id(abfallnxtr).state * 24) + (24 - id(zeit).now().hour);
-              lz = 0;
-              if (lza > 12 and lza < 37) {
-                  colR = 0;
-                  colG = 0;
-                  colB = 1;
-                  lz = lza;
-              }
-              if (lzb > 12 and lzb < 37) {
-                  colR = 0;
-                  colG = 1;
-                  colB = 0;
-                  lz = lzb;
-              }
-              if (lzg > 12 and lzg < 37) {
-                  colR = 0;
-                  colG = 1;
-                  colB = 1;
-                  lz = lzg;
-              }
-              if (lzr > 12 and lzr < 37) {
-                  colR = 1;
-                  colG = 0;
-                  colB = 0;
-                  lz = lzr;
-              }
-              if ((lza == lzb) or (lza == lzg) or (lza == lzr) or (lzb == lzg) or (lzb == lzr) or (lzg == lzr)) {
-                  colR = 1;
-                  colG = 1;
-                  colB = 1;
-              }
-              if (lz > 12 and lz < 37) {
-                  auto call = id(abfallneo).turn_on();
-                  call.set_rgb(colR, colG, colB);
-                  switch (lz) {
-                    case 13 ... 18 : call.set_effect("scan");
-                    case 19 ... 28 : call.set_effect("pulse");
-                    case 29 ... 36 : call.set_effect("none");
-                    default : call.set_effect("none");
-                    call.perform();
-                  }
-              } else {
-                  auto call = id(abfallneo).turn_off();
-                  call.perform();
-              }
-          # - if:
-              # condition:
-                # lambda: 'return id(lampe);'
-              # then:
-                # - light.turn_on:
-                    # id: abfallneo
-                    # red: !lambda 'return id(lampe) * (id(fehler) * 1 +id(arest) * 1  + id(agelb) * 1);'
-                    # blue: !lambda 'return id(lampe) * (id(fehler) * 1 +id(apapier) * 1 );'
-                    # green: !lambda 'return id(lampe) * (id(fehler) * 1 +id(abio) * 1 + id(agelb) * 1 );'
-                    # effect: !lambda |-
-                      # int i;
-                      # i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
-                      # switch (i) {
-                        # case 0 ... 12 : return std::string("none");
-                        # case 13 ... 18 : return std::string("scan");
-                        # case 19 ... 28 : return std::string("pulse");
-                        # case 29 ... 48 : return std::string("none");
-                        # default : return std::string("none");
-                      # }
-                    # brightness: !lambda |-
-                      # int i;
-                      # i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
-                      # switch (i) {
-                        # case 0 ... 12 : return 0.01;
-                        # default : return 1.00;
-                      # }
-              # else:
-                # - light.turn_on:
-                    # id: abfallneo
-                    # brightness: 100%
-                    # red: 1
-                    # blue: 1
-                    # green: 1
-                # - delay: 3s    
-                # - light.turn_off:
-                    # id: abfallneo
+          - if:
+              condition:
+                lambda: 'return id(lampe);'
+              then:
+                - light.turn_on:
+                    id: abfallneo
+                    red: !lambda 'return id(lampe) * (id(fehler) * 1 +id(arest) * 1  + id(agelb) * 1);'
+                    blue: !lambda 'return id(lampe) * (id(fehler) * 1 +id(apapier) * 1 );'
+                    green: !lambda 'return id(lampe) * (id(fehler) * 1 +id(abio) * 1 + id(agelb) * 1 );'
+                    effect: !lambda |-
+                      int i;
+                      i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
+                      switch (i) {
+                        case 0 ... 12 : return std::string("none");
+                        case 13 ... 18 : return std::string("scan");
+                        case 19 ... 28 : return std::string("pulse");
+                        case 29 ... 48 : return std::string("none");
+                        default : return std::string("none");
+                      }
+                    brightness: !lambda |-
+                      int i;
+                      i = (id(abfall1).state * 24) + (24 - id(zeit).now().hour);
+                      switch (i) {
+                        case 0 ... 12 : return 0.01;
+                        default : return 1.00;
+                      }
+              else:
+                - light.turn_on:
+                    id: abfallneo
+                    brightness: 100%
+                    red: 1
+                    blue: 1
+                    green: 1
+                - delay: 3s    
+                - light.turn_off:
+                    id: abfallneo
 
 
 # i = (id(abfall1).state * 24) + (24 - id(zeit).hour);
@@ -154,22 +97,6 @@ globals:
 
 
 sensor:
-  - platform: homeassistant
-    id: abfallnxta
-    internal: true
-    entity_id: sensor.abfallnxta
-  - platform: homeassistant
-    id: abfallnxtb
-    internal: true
-    entity_id: sensor.abfallnxtb
-  - platform: homeassistant
-    id: abfallnxtg
-    internal: true
-    entity_id: sensor.abfallnxtg
-  - platform: homeassistant
-    id: abfallnxtr
-    internal: true
-    entity_id: sensor.abfallnxtr
   - platform: homeassistant
     id: abfall1
     internal: true
