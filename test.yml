@@ -20,6 +20,19 @@ wifi: !include secrets.yaml
 captive_portal:
 
 
+time:
+  - platform: sntp
+    id: zeit
+    on_time:
+      - seconds: 0
+        minutes: /1
+#        hours: *
+        then:
+          - lambda: |-
+              int lz;
+              ESP_LOGD("HUL2", "Zeit %d", id(zeit).now());
+
+
 binary_sensor:
   - platform: gpio
     pin:
