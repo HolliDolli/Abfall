@@ -19,11 +19,24 @@ wifi: !include secrets.yaml
   # Enable fallback hotspot (captive portal) in case wifi connection fails
 captive_portal:
 
+globals:
+  - id: lampe
+    type: bool
+    initial_value: 'false'
+
+
 time:
   - platform: homeassistant
     id: zeit
     on_time:
-      - seconds: 30
+      - seconds: 45
+        minutes: 57
+        hours: 11
+        then:
+          - globals.set:
+              id: lampe
+              value: 'false'
+      - seconds: 0
         minutes: /5
         then:
           - if:
@@ -39,8 +52,8 @@ time:
                 - delay: 3s    
                 - light.turn_off:
                     id: abfallneo
-      - seconds: 0
-        minutes: /5
+      - seconds: 30
+        minutes: /1
         then:
           - lambda: |-
               int lz;
@@ -48,70 +61,76 @@ time:
               int lzb;
               int lzg;
               int lzr;
-              int colR;
-              int colG;
-              int colB;
+              static int colR;
+              static int colG;
+              static int colB;
+              ESP_LOGD("HUL1", "Tick mit Lampe %d", id(lampe));
               lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
               lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
               lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
               lzr = (id(abfallnxtr).state * 24) + (24 - id(zeit).now().hour);
+              ESP_LOGD("HUL1", "a: %d; b: %d; g: %d; r: %d", lza, lzb, lzg, lzr);
               lz = 0;
               if (lza > 12 and lza < 37) {
+                  ESP_LOGD("HUL1", "choice A");
                   colR = 0;
                   colG = 0;
                   colB = 1;
                   lz = lza;
+                  id(lampe) = true;
               }
               if (lzb > 12 and lzb < 37) {
+                  ESP_LOGD("HUL1", "choice B");
                   colR = 0;
                   colG = 1;
                   colB = 0;
                   lz = lzb;
+                  id(lampe) = true;
               }
               if (lzg > 12 and lzg < 37) {
+                  ESP_LOGD("HUL1", "choice G");
                   colR = 0;
                   colG = 1;
                   colB = 1;
                   lz = lzg;
+                  id(lampe) = true;
               }
               if (lzr > 12 and lzr < 37) {
+                  ESP_LOGD("HUL1", "choice R");
                   colR = 1;
                   colG = 0;
                   colB = 0;
                   lz = lzr;
+                  id(lampe) = true;
               }
               if ((lza == lzb) or (lza == lzg) or (lza == lzr) or (lzb == lzg) or (lzb == lzr) or (lzg == lzr)) {
+                  ESP_LOGD("HUL1", "choice multi");
                   colR = 1;
                   colG = 1;
                   colB = 1;
               }
-              if (lz > 12 and lz < 37) {
+              if (id(lampe)) {
+                  ESP_LOGD("HUL1", "Lampe an %d", lz);
                   auto call = id(abfallneo).turn_on();
                   call.set_rgb(colR, colG, colB);
                   switch (lz) {
-                    case 13 ... 18 : call.set_effect("scan");
-                    case 19 ... 28 : call.set_effect("pulse");
-                    case 29 ... 36 : call.set_effect("none");
-                    default : call.set_effect("none");
+                    case 0 : call.set_effect("scan"); break; // jetzt sind wir im "gemerkten" Tag.
+                    case 13 ... 18 : call.set_effect("scan"); break; // hier kommen wir nie rein, weil dann schon der nächste Kalendereintrag aktiv ist.
+                    case 19 ... 28 : call.set_effect("pulse"); break;
+                    case 29 ... 36 : call.set_effect("none"); break;
+                    default : call.set_effect("strobe");  // darf eigentlich nicht passieren!
                     call.perform();
-                    id(lampe) = true;
                   }
               } else {
+                  ESP_LOGD("HUL1", "Lampe aus %d", lz);
                   auto call = id(abfallneo).turn_off();
                   call.perform();
-                  id(lampe) = false;
               }
 
 
 sun:
   latitude: 51.14°
   longitude: 9.414°
-
-globals:
-  - id: lampe
-    type: bool
-    initial_value: 'false'
-
 
 sensor:
   - platform: homeassistant
@@ -151,16 +170,3 @@ light:
       - addressable_random_twinkle:
       - addressable_fireworks:
       - addressable_flicker:
-
-# i2c:
-  # sda: D2
-  # scl: D1
-
-# display:
-  # - platform: lcd_pcf8574
-    # dimensions: 16x2
-    # address: 0x27
-    # lambda: |-
-      # it.printf(0,0,"%f", id(abfallnxta).state);
-
-
