@@ -65,7 +65,7 @@ time:
                 - light.turn_off:
                     id: abfallneo
       - seconds: 30
-        minutes: /1
+        minutes: /5
         then:
           - lambda: |-
               int lz;
