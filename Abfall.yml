@@ -23,6 +23,9 @@ globals:
   - id: lampe
     type: bool
     initial_value: 'false'
+  - id: button
+    type: bool
+    initial_value: 'false'
 
 
 time:
@@ -36,6 +39,18 @@ time:
           - globals.set:
               id: lampe
               value: 'false'
+          - globals.set:
+              id: button
+              value: 'false'
+          - light.turn_on:
+              id: abfallneo
+              brightness: 100%
+              red: 1
+              blue: 1
+              green: 1
+          - delay: 1s    
+          - light.turn_off:
+              id: abfallneo
       - seconds: 0
         minutes: /5
         then:
@@ -46,9 +61,6 @@ time:
                 - light.turn_on:
                     id: abfallneo
                     brightness: 100%
-                    red: 1
-                    blue: 1
-                    green: 1
                 - delay: 3s    
                 - light.turn_off:
                     id: abfallneo
@@ -64,7 +76,7 @@ time:
               static int colR;
               static int colG;
               static int colB;
-              ESP_LOGD("HUL1", "Tick mit Lampe %d", id(lampe));
+              ESP_LOGD("HUL1", "Tick mit Lampe %d und Button %d", id(lampe), id(button));
               lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
               lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
               lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
@@ -109,18 +121,18 @@ time:
                   colG = 1;
                   colB = 1;
               }
-              if (id(lampe)) {
+              if (id(lampe) and !id(button)) {
                   ESP_LOGD("HUL1", "Lampe an %d", lz);
                   auto call = id(abfallneo).turn_on();
                   call.set_rgb(colR, colG, colB);
                   switch (lz) {
-                    case 0 : call.set_effect("scan"); break; // jetzt sind wir im "gemerkten" Tag.
-                    case 13 ... 18 : call.set_effect("scan"); break; // hier kommen wir nie rein, weil dann schon der nächste Kalendereintrag aktiv ist.
+                    case 0 : call.set_effect("scan"); break; // jetzt sind wir im "gemerkten" Tag. wird aber durch WCS bereits erledigt.
+                    case 13 ... 18 : call.set_effect("scan"); break; 
                     case 19 ... 28 : call.set_effect("pulse"); break;
                     case 29 ... 36 : call.set_effect("none"); break;
                     default : call.set_effect("strobe");  // darf eigentlich nicht passieren!
-                    call.perform();
                   }
+                  call.perform();
               } else {
                   ESP_LOGD("HUL1", "Lampe aus %d", lz);
                   auto call = id(abfallneo).turn_off();
@@ -131,6 +143,23 @@ time:
 sun:
   latitude: 51.14°
   longitude: 9.414°
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: D3
+      mode:
+        input: true
+        pullup: true
+    name: "button"
+    on_press:
+      then:
+        - logger.log: "button pressed"
+        - globals.set:
+            id: button
+            value: 'true'
+        - light.turn_off:
+            id: abfallneo
 
 sensor:
   - platform: homeassistant

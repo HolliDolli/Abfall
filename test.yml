@@ -20,6 +20,18 @@ wifi: !include secrets.yaml
 captive_portal:
 
 
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: D3
+      mode:
+        input: true
+        pullup: true
+    name: "button"
+    on_press:
+      then:
+        - logger.log: "button pressed"
+
 light:
   - platform: neopixelbus
     type: GRB
