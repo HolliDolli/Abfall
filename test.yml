@@ -20,26 +20,195 @@ wifi: !include secrets.yaml
 captive_portal:
 
 
+# time:
+  # - platform: sntp
+    # id: zeit
+    # on_time:
+      # - seconds: 0
+        # minutes: /1
+# #        hours: *
+        # then:
+          # - lambda: |-
+              # int lz;
+              # int MaxAbfDatum = 86; //Werte + 8 für Header und Trailer + 1 für bin-0
+              # int heute;
+              # int strAbfDatum[MaxAbfDatum] = {0, 0, 0, 0, 20230302, 20230303, 20230308, 20230310, 20230316, 20230317, 20230324, 20230330, 20230331, 20230404, 20230406, 20230413, 20230415, 20230421, 20230427, 20230428, 20230504, 20230506, 20230511, 20230512, 20230520, 20230525, 20230526, 20230601, 20230603, 20230609, 20230610, 20230616, 20230622, 20230623, 20230628, 20230630, 20230706, 20230707, 20230714, 20230720, 20230721, 20230726, 20230728, 20230803, 20230804, 20230811, 20230817, 20230818, 20230823, 20230825, 20230831, 20230901, 20230908, 20230914, 20230915, 20230920, 20230922, 20230928, 20230929, 20231007, 20231012, 20231013, 20231018, 20231020, 20231026, 20231027, 20231103, 20231109, 20231110, 20231115, 20231117, 20231123, 20231124, 20231201, 20231207, 20231208, 20231213, 20231215, 20231221, 20231222, 20231230, 99999999, 99999999, 99999999, 99999999};
+              # char strAbfType[] = "ABGRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRGBPRGBRABGR"; //Vorne und hinten ABGR anhängen!!
+              # heute = id(zeit).now().year * 10000 + id(zeit).now().month * 100 + id(zeit).now().day_of_month;  
+              # ESP_LOGD("HUL2", "Zeit %d", heute);
+
+
+
+              # if (id(statussensor).state) {
+                  # ESP_LOGD("HUL2", "Online");
+              # } else {
+                  # ESP_LOGD("HUL2", "Offline");
+              # }              
+
+#   https://esphome.io/components/time/index.html
+#   http://www.willemer.de/informatik/cpp/array.htm
+
+
+
+
+globals:
+  - id: lampe
+    type: bool
+    initial_value: 'false'
+  - id: button
+    type: bool
+    initial_value: 'false'
+
+
 time:
   - platform: sntp
     id: zeit
     on_time:
+      - seconds: 45
+        minutes: 57
+        hours: 11
+        then:
+          - globals.set:
+              id: lampe
+              value: 'false'
+          - globals.set:
+              id: button
+              value: 'false'
+          - light.turn_on:
+              id: abfallneo
+              brightness: 100%
+              red: 1
+              blue: 1
+              green: 1
+          - delay: 1s    
+          - light.turn_off:
+              id: abfallneo
       - seconds: 0
+        minutes: /5
+        then:
+          - if:
+              condition:
+                light.is_off: abfallneo
+              then:
+                - light.turn_on:
+                    id: abfallneo
+                    brightness: 100%
+                - delay: 3s    
+                - light.turn_off:
+                    id: abfallneo
+      - seconds: 30
         minutes: /1
-#        hours: *
         then:
           - lambda: |-
+              int MaxAbfDatum = 85; //Werte + 8 für Header und Trailer 
+              int heute;
+              int intAbfDatum[MaxAbfDatum] = {0, 0, 0, 0, 20230301, 20230302, 20230307, 20230309, 20230315, 20230316, 20230323, 20230329, 20230330, 20230403, 20230405, 20230412, 20230414, 20230420, 20230426, 20230427, 20230503, 20230505, 20230510, 20230511, 20230519, 20230524, 20230525, 20230531, 20230602, 20230608, 20230609, 20230615, 20230621, 20230622, 20230627, 20230629, 20230705, 20230706, 20230713, 20230719, 20230720, 20230725, 20230727, 20230802, 20230803, 20230810, 20230816, 20230817, 20230822, 20230824, 20230830, 20230831, 20230907, 20230913, 20230914, 20230919, 20230921, 20230927, 20230928, 20231006, 20231011, 20231012, 20231017, 20231019, 20231025, 20231026, 20231102, 20231108, 20231109, 20231114, 20231116, 20231122, 20231123, 20231130, 20231206, 20231207, 20231212, 20231214, 20231220, 20231221, 20231229, 99999999, 99999999, 99999999, 99999999};
+              char chrAbfType[] = "ABGRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRABGR"; //Vorne und hinten ABGR anhängen!!
               int lz;
-              int MaxAbfDatum = 77;
-              string heute;
-              string strAbfDatum[MaxAbfDatum] = {20230302, 20230303, 20230308, 20230310, 20230316, 20230317, 20230324, 20230330, 20230331, 20230404, 20230406, 20230413, 20230415, 20230421, 20230427, 20230428, 20230504, 20230506, 20230511, 20230512, 20230520, 20230525, 20230526, 20230601, 20230603, 20230609, 20230610, 20230616, 20230622, 20230623, 20230628, 20230630, 20230706, 20230707, 20230714, 20230720, 20230721, 20230726, 20230728, 20230803, 20230804, 20230811, 20230817, 20230818, 20230823, 20230825, 20230831, 20230901, 20230908, 20230914, 20230915, 20230920, 20230922, 20230928, 20230929, 20231007, 20231012, 20231013, 20231018, 20231020, 20231026, 20231027, 20231103, 20231109, 20231110, 20231115, 20231117, 20231123, 20231124, 20231201, 20231207, 20231208, 20231213, 20231215, 20231221, 20231222, 20231230};
-              string strAbfType[MaxAbfDatum] = { G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R, G, B, P, R, G, B, R};
-              heute = it.strftime(0,0,id(font))
-              ESP_LOGD("HUL2", "Zeit %d", id(zeit).now());
+              int lza = 0;
+              int lzb = 0;
+              int lzg = 0;
+              int lzr = 0;
+              static int colR;
+              static int colG;
+              static int colB;
+              char c;
+              ESP_LOGD("HUL1", "Tick mit Lampe %d und Button %d", id(lampe), id(button));
+              heute = id(zeit).now().year * 10000 + id(zeit).now().month * 100 + id(zeit).now().day_of_month;  
+              ESP_LOGD("HUL1", "Zeit %d", heute);
+              ESP_LOGD("HUL1", "Sensor %f", (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour));
+              if ((id(statussensor).state) and !isnan(id(abfallnxta).state)) { //tricky check ob wert = nan
+                  ESP_LOGD("HUL2", "Online");
+                  lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
+                  lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
+                  lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
+                  lzr = (id(abfallnxtr).state * 24) + (24 - id(zeit).now().hour);
+              } else {
+                  ESP_LOGD("HUL2", "Offline oder nan");
+                  for (int i = 0; i<MaxAbfDatum; i++) {
+                      c = intAbfDatum[i];
+                      if (intAbfDatum[i] >= heute ){
+                          switch (chrAbfType[i]) {
+                              // +1, da wir den einen Tag den wir in Excel abgezogen haben ja wieder draufrechnen müssen.
+                              case 'A':
+                                  if (lza == 0) lza = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
+                              break;
+                              case 'B':
+                                  if (lzb == 0) lzb = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
+                              break;
+                              case 'G':
+                                  if (lzg == 0) lzg = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
+                              break;
+                              case 'R':
+                                  if (lzr == 0) lzr = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
+                              break;
+                          }
+                      }
+                  }
+              }              
+              
+              ESP_LOGD("HUL1", "a: %d; b: %d; g: %d; r: %d", lza, lzb, lzg, lzr);
+              lz = 0;
+              if (lza > 12 and lza < 37) {
+                  ESP_LOGD("HUL1", "choice A");
+                  colR = 0;
+                  colG = 0;
+                  colB = 1;
+                  lz = lza;
+                  id(lampe) = true;
+              }
+              if (lzb > 12 and lzb < 37) {
+                  ESP_LOGD("HUL1", "choice B");
+                  colR = 0;
+                  colG = 1;
+                  colB = 0;
+                  lz = lzb;
+                  id(lampe) = true;
+              }
+              if (lzg > 12 and lzg < 37) {
+                  ESP_LOGD("HUL1", "choice G");
+                  colR = 1;
+                  colG = 1;
+                  colB = 0;
+                  lz = lzg;
+                  id(lampe) = true;
+              }
+              if (lzr > 12 and lzr < 37) {
+                  ESP_LOGD("HUL1", "choice R");
+                  colR = 1;
+                  colG = 0;
+                  colB = 0;
+                  lz = lzr;
+                  id(lampe) = true;
+              }
+              if ((lza == lzb) or (lza == lzg) or (lza == lzr) or (lzb == lzg) or (lzb == lzr) or (lzg == lzr)) {
+                  ESP_LOGD("HUL1", "choice multi");
+                  colR = 1;
+                  colG = 1;
+                  colB = 1;
+              }
+              if (id(lampe) and !id(button)) {
+                  ESP_LOGD("HUL1", "Lampe an %d", lz);
+                  auto call = id(abfallneo).turn_on();
+                  call.set_rgb(colR, colG, colB);
+                  switch (lz) {
+                    case 0 : call.set_effect("scan"); break; // jetzt sind wir im "gemerkten" Tag. wird aber durch WCS bereits erledigt.
+                    case 13 ... 18 : call.set_effect("scan"); break; 
+                    case 19 ... 28 : call.set_effect("pulse"); break;
+                    case 29 ... 36 : call.set_effect("none"); break;
+                    default : call.set_effect("strobe");  // darf eigentlich nicht passieren!
+                  }
+                  call.perform();
+              } else {
+                  ESP_LOGD("HUL1", "Lampe aus %d", lz);
+                  auto call = id(abfallneo).turn_off();
+                  call.perform();
+              }
 
-https://esphome.io/components/time/index.html
-http://www.willemer.de/informatik/cpp/array.htm
 
+sun:
+  latitude: 51.14°
+  longitude: 9.414°
 
 binary_sensor:
   - platform: gpio
@@ -52,6 +221,33 @@ binary_sensor:
     on_press:
       then:
         - logger.log: "button pressed"
+        - globals.set:
+            id: button
+            value: 'true'
+        - light.turn_off:
+            id: abfallneo
+  - platform: status
+    name: "Statussensor"
+    id: statussensor
+
+
+sensor:
+  - platform: homeassistant
+    id: abfallnxta
+    internal: true
+    entity_id: sensor.abfallnxtax
+  - platform: homeassistant
+    id: abfallnxtb
+    internal: true
+    entity_id: sensor.abfallnxtbx
+  - platform: homeassistant
+    id: abfallnxtg
+    internal: true
+    entity_id: sensor.abfallnxtgx
+  - platform: homeassistant
+    id: abfallnxtr
+    internal: true
+    entity_id: sensor.abfallnxtrx
 
 light:
   - platform: neopixelbus
@@ -60,7 +256,7 @@ light:
     pin: D6
     num_leds: 3
     name: "Test NeoPix"
-    id: testneo
+    id: abfallneo
     effects:
       - random:
       - pulse:
