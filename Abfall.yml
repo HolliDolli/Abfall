@@ -101,9 +101,9 @@ time:
               }
               if (lzg > 12 and lzg < 37) {
                   ESP_LOGD("HUL1", "choice G");
-                  colR = 0;
+                  colR = 1;
                   colG = 1;
-                  colB = 1;
+                  colB = 0;
                   lz = lzg;
                   id(lampe) = true;
               }
