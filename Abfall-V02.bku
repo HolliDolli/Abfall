@@ -19,9 +19,6 @@ wifi: !include secrets.yaml
   # Enable fallback hotspot (captive portal) in case wifi connection fails
 captive_portal:
 
-
-
-
 globals:
   - id: lampe
     type: bool
@@ -32,7 +29,7 @@ globals:
 
 
 time:
-  - platform: sntp
+  - platform: homeassistant
     id: zeit
     on_time:
       - seconds: 45
@@ -71,51 +68,19 @@ time:
         minutes: /5
         then:
           - lambda: |-
-              int MaxAbfDatum = 85; //Werte + 8 für Header und Trailer 
-              int heute;
-              int intAbfDatum[MaxAbfDatum] = {0, 0, 0, 0, 20230301, 20230302, 20230307, 20230309, 20230315, 20230316, 20230323, 20230329, 20230330, 20230403, 20230405, 20230412, 20230414, 20230420, 20230426, 20230427, 20230503, 20230505, 20230510, 20230511, 20230519, 20230524, 20230525, 20230531, 20230602, 20230608, 20230609, 20230615, 20230621, 20230622, 20230627, 20230629, 20230705, 20230706, 20230713, 20230719, 20230720, 20230725, 20230727, 20230802, 20230803, 20230810, 20230816, 20230817, 20230822, 20230824, 20230830, 20230831, 20230907, 20230913, 20230914, 20230919, 20230921, 20230927, 20230928, 20231006, 20231011, 20231012, 20231017, 20231019, 20231025, 20231026, 20231102, 20231108, 20231109, 20231114, 20231116, 20231122, 20231123, 20231130, 20231206, 20231207, 20231212, 20231214, 20231220, 20231221, 20231229, 99999999, 99999999, 99999999, 99999999};
-              char chrAbfType[] = "ABGRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRABGR"; //Vorne und hinten ABGR anhängen!!
               int lz;
-              int lza = 0;
-              int lzb = 0;
-              int lzg = 0;
-              int lzr = 0;
+              int lza;
+              int lzb;
+              int lzg;
+              int lzr;
               static int colR;
               static int colG;
               static int colB;
               ESP_LOGD("HUL1", "Tick mit Lampe %d und Button %d", id(lampe), id(button));
-              heute = id(zeit).now().year * 10000 + id(zeit).now().month * 100 + id(zeit).now().day_of_month;  
-              ESP_LOGD("HUL1", "Zeit %d", heute);
-              ESP_LOGD("HUL1", "Sensor %f", (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour));
-              if ((id(statussensor).state) and !isnan(id(abfallnxta).state)) { 
-                  ESP_LOGD("HUL2", "Online");
-                  lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
-                  lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
-                  lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
-                  lzr = (id(abfallnxtr).state * 24) + (24 - id(zeit).now().hour);
-              } else {
-                  ESP_LOGD("HUL2", "Offline oder nan");
-                  for (int i = 0; i<MaxAbfDatum; i++) {
-                      if (intAbfDatum[i] >= heute ){
-                          switch (chrAbfType[i]) {
-                              // +1, da wir den einen Tag den wir in Excel abgezogen haben ja wieder draufrechnen müssen.
-                              case 'A':
-                                  if (lza == 0) lza = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
-                              break;
-                              case 'B':
-                                  if (lzb == 0) lzb = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
-                              break;
-                              case 'G':
-                                  if (lzg == 0) lzg = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
-                              break;
-                              case 'R':
-                                  if (lzr == 0) lzr = ((intAbfDatum[i] - heute + 1) * 24) + (24 - id(zeit).now().hour);
-                              break;
-                          }
-                      }
-                  }
-              }              
-              
+              lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
+              lzb = (id(abfallnxtb).state * 24) + (24 - id(zeit).now().hour);
+              lzg = (id(abfallnxtg).state * 24) + (24 - id(zeit).now().hour);
+              lzr = (id(abfallnxtr).state * 24) + (24 - id(zeit).now().hour);
               ESP_LOGD("HUL1", "a: %d; b: %d; g: %d; r: %d", lza, lzb, lzg, lzr);
               lz = 0;
               if (lza > 12 and lza < 37) {
@@ -195,10 +160,6 @@ binary_sensor:
             value: 'true'
         - light.turn_off:
             id: abfallneo
-  - platform: status
-    name: "Statussensor"
-    id: statussensor
-
 
 sensor:
   - platform: homeassistant
@@ -238,5 +199,3 @@ light:
       - addressable_random_twinkle:
       - addressable_fireworks:
       - addressable_flicker:
-
-
