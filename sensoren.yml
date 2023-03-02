@@ -1,0 +1,30 @@
+#Musterbeispiel für die Sensoren in Homeassistant.  
+
+  - platform: waste_collection_schedule
+    source_index: [0, 1, 2, 3]
+    name: AbfallNxtB
+    details_format: "upcoming"
+    value_template: ' {{ value.daysTo }} '
+    types:
+      - Biomuell
+  - platform: waste_collection_schedule
+    source_index: [0, 1, 2, 3]
+    name: AbfallNxtG
+    details_format: "upcoming"
+    value_template: ' {{ value.daysTo }} '
+    types:
+      - Gelbe
+  - platform: waste_collection_schedule
+    source_index: [0, 1, 2, 3]
+    name: AbfallNxtR
+    details_format: "upcoming"
+    value_template: ' {{ value.daysTo }} '
+    types:
+      - Restmuell
+  - platform: waste_collection_schedule
+    source_index: [0, 1, 2, 3]
+    name: AbfallNxtA
+    details_format: "upcoming"
+    value_template: ' {{ value.daysTo }} '
+    types:
+      - Altpapier
