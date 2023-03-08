@@ -14,7 +14,11 @@ api:
 ota:
   password: ""
 
-wifi: !include secrets.yaml
+wifi:
+  ssid: nonet
+  ap:
+    ssid: "Luna Fallback Hotspot"
+    password: "xyz12345"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
 captive_portal:
