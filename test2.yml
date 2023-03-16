@@ -1,0 +1,69 @@
+esphome:
+  name: test2
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi: 
+  ssid: !secret ssid
+  password: !secret password
+  ap:
+    ssid: "Luna Fallback Hotspot"
+    password: "xyz12345"
+
+  
+  
+  
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+captive_portal:
+
+
+
+time:
+  - platform: sntp
+    id: zeit
+    on_time:
+      - seconds: 0
+        minutes: /1
+        then:
+          - light.turn_on:
+              id: abfallneo
+              effect: scan
+              brightness: 100%
+          - delay: 4s    
+          - light.turn_off:
+              id: abfallneo
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: D6
+    num_leds: 8
+    name: "Abfall NeoPix"
+    id: abfallneo
+    effects:
+      - random:
+      - pulse:
+      - strobe:
+      - flicker:
+      - addressable_rainbow:
+      - addressable_color_wipe:
+      - addressable_scan:
+      - addressable_twinkle:
+      - addressable_random_twinkle:
+      - addressable_fireworks:
+      - addressable_flicker:
+
+
