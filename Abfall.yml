@@ -15,20 +15,27 @@ esp8266:
 logger:
 
 # Enable Home Assistant API
+#
+# Achtung: Für Offlinekalender muss der API-Reboot auf 0s gesetzt werden, da die Tonne sonst alle 15 Minuten neu startet.
+#
 api:
   password: ""
+#  reboot_timeout: 0s  # only enable this when creating an offline Wastebin
 
 ota:
   password: ""
 
 wifi:
-  ssid: nonet
+#  ssid: nonet # enable this for captive-portal and remove password!
+  ssid: !secret GKssid
+  password: !secret GKpassword
   ap:
     ssid: "Luna Fallback Hotspot"
     password: "xyz12345"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
 captive_portal:
+#  keep_user_credentials: true  # option nicht aktiv.
 
 
 
@@ -83,12 +90,24 @@ time:
         minutes: /5
         then:
           - lambda: |-
+              //
+              // Achtung: Für Offlinekalender muss der API-Reboot auf 0s gesetzt werden, da die Tonne sonst alle 15 Minuten neu startet.
+              //
+              // Hier werden die Daten für den Offlinekalender hinterlegt.
+              // Es gibt nur 4 Abfuhrtypen:
+              // A = Altpapier = Blau, Sensorname: abfallnxta
+              // B = Biotonne = Grün, Sensorname: abfallnxtb
+              // G = Gelbe Tonne = Gelb, Sensorname: abfallnxtg
+              // R = Restmüll = Rot, Sensorname: abfallnxtr
+              // MaxAbfDatum sind die Zahl der Abfuhrtermine plus 8 für 4 führende und 4 endende Termine.
+              // intAbfDatum enthält die Abfuhrtermine mit 4 mal 0 führend und 4 mal 99999999 endend.
+              // chrAbfType enthält die Abfuhrtypen zu den Terminen, mit allen 4 Typen einmal führend und einmal endend.
               // Daten Fuldabrück 2023
               //int MaxAbfDatum = 78 + 8; // + 8 für Header und Trailer 
               //int intAbfDatum[MaxAbfDatum] = {0, 0, 0, 0, 20230301, 20230302, 20230307, 20230309, 20230315, 20230316, 20230323, 20230329, 20230330, 20230403, 20230405, 20230412, 20230414, 20230420, 20230426, 20230427, 20230503, 20230505, 20230510, 20230511, 20230519, 20230524, 20230525, 20230531, 20230602, 20230608, 20230609, 20230615, 20230621, 20230622, 20230627, 20230629, 20230705, 20230706, 20230713, 20230719, 20230720, 20230725, 20230727, 20230802, 20230803, 20230810, 20230816, 20230817, 20230822, 20230824, 20230830, 20230831, 20230907, 20230913, 20230914, 20230919, 20230921, 20230927, 20230928, 20231006, 20231011, 20231012, 20231017, 20231019, 20231025, 20231026, 20231102, 20231108, 20231109, 20231114, 20231116, 20231122, 20231123, 20231130, 20231206, 20231207, 20231212, 20231214, 20231220, 20231221, 20231229, 99999999, 99999999, 99999999, 99999999};
               //char chrAbfType[] = "ABGRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRGBARGBRABGR"; //Vorne und hinten ABGR anhängen!!
               // Daten Felsberg 2023
-              int MaxAbfDatum = 59 +8; // + 8 für Header und Trailer 
+              int MaxAbfDatum = 59 + 8; // + 8 für Header und Trailer 
               int intAbfDatum[MaxAbfDatum] = {0, 0, 0, 0, 20230227, 20230302, 20230312, 20230314, 20230316, 20230320, 20230330, 20230410, 20230411, 20230413, 20230414, 20230427, 20230501, 20230507, 20230509, 20230511, 20230522, 20230525, 20230604, 20230606, 20230608, 20230612, 20230622, 20230702, 20230703, 20230704, 20230706, 20230720, 20230724, 20230730, 20230801, 20230803, 20230814, 20230817, 20230827, 20230829, 20230831, 20230904, 20230914, 20230922, 20230924, 20230925, 20230926, 20231012, 20231016, 20231022, 20231024, 20231026, 20231106, 20231109, 20231119, 20231121, 20231123, 20231127, 20231207, 20231217, 20231218, 20231219, 20231221, 99999999, 99999999, 99999999, 99999999};
               char chrAbfType[] = "ABGRRBAGBRBRGBABRAGBRBAGBRBARGBBRAGBRBAGBRBBARGBRAGBRBAGBRBARGBABGR"; //Vorne und hinten ABGR anhängen!!
               int heute;
