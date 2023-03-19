@@ -26,8 +26,8 @@ ota:
   password: ""
 
 wifi:
-#  ssid: nonet # enable this for captive-portal and remove password!
   ssid: !secret GKssid
+#  for captive-portal remove password
   password: !secret GKpassword
   ap:
     ssid: "Luna Fallback Hotspot"
@@ -100,7 +100,7 @@ time:
               // G = Gelbe Tonne = Gelb, Sensorname: abfallnxtg
               // R = Restmüll = Rot, Sensorname: abfallnxtr
               // MaxAbfDatum sind die Zahl der Abfuhrtermine plus 8 für 4 führende und 4 endende Termine.
-              // intAbfDatum enthält die Abfuhrtermine mit 4 mal 0 führend und 4 mal 99999999 endend.
+              // intAbfDatum enthält die Abfuhrtermine mit 4 mal 0 führend und 4 mal 99999999 endend. Achtung: Immer den Tag vor dem Abfuhrtermin, damit das abziehen von "heute" klappt.
               // chrAbfType enthält die Abfuhrtypen zu den Terminen, mit allen 4 Typen einmal führend und einmal endend.
               // Daten Fuldabrück 2023
               //int MaxAbfDatum = 78 + 8; // + 8 für Header und Trailer 
@@ -123,7 +123,7 @@ time:
               heute = id(zeit).now().year * 10000 + id(zeit).now().month * 100 + id(zeit).now().day_of_month;  
               ESP_LOGD("HUL1", "Zeit %d", heute);
               ESP_LOGD("HUL1", "Sensor %f", (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour));
-              // Zum testen der Offlinefunktion reicht es die Sensoren aus Homeassistant umzubenennen, dann greift das System auf die Offlinedaten, da die Sensoren dan nan sind.
+              // Zum testen der Offlinefunktion reicht es die Sensoren aus Homeassistant umzubenennen, dann greift das System auf die Offlinedaten, da die Sensoren dann nan sind.
               if ((id(statussensor).state) and !isnan(id(abfallnxta).state)) { 
                   ESP_LOGD("HUL2", "Online");
                   lza = (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour);
