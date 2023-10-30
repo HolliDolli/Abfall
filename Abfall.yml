@@ -20,15 +20,15 @@ logger:
 #
 api:
   password: ""
-#  reboot_timeout: 0s  # only enable this when creating an offline Wastebin
+ #  reboot_timeout: 0s  # only enable this when creating an offline Wastebin
 
 ota:
   password: ""
 
 wifi:
-  ssid: !secret GKssid
+  ssid: !secret BGssid
 #  for captive-portal remove password
-  password: !secret GKpassword
+  password: !secret BGpassword
   ap:
     ssid: "Luna Fallback Hotspot"
     password: "xyz12345"
