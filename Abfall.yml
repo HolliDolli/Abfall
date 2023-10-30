@@ -26,9 +26,9 @@ ota:
   password: ""
 
 wifi:
-  ssid: !secret BGssid
+  ssid: !secret GKssid
 #  for captive-portal remove password
-  password: !secret BGpassword
+  password: !secret GKpassword
   ap:
     ssid: "Luna Fallback Hotspot"
     password: "xyz12345"
@@ -74,6 +74,7 @@ time:
               id: abfallneo
       - seconds: 0
         minutes: /5
+        hours: 6-22
         then:
           - if:
               condition:
