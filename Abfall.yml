@@ -33,6 +33,13 @@ wifi:
   ap:
     ssid: !secret FBssid
     password: !secret FBpassword
+  on_connect:
+    - light.turn_on:
+        id: abfallneo
+        effect: rainbow
+        brightness: 100%
+    - logger.log: "WiFi connected"
+        
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
 captive_portal:
