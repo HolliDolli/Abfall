@@ -49,7 +49,6 @@ ota:
 
 api:
   reboot_timeout: 60min
-  password: ""
   on_client_connected:
     - light.turn_off:
         id: abfallneo
@@ -92,7 +91,8 @@ time:
         then:
           - if:
               condition:
-                light.is_off: abfallneo
+                - light.is_off: abfallneo
+                - switch.is_on: blinki
               then:
               - if:
                   condition:
@@ -107,9 +107,9 @@ time:
                             id: abfallneo
                             effect: none
                             brightness: 100%
-                            red: 0
-                            blue: 0
-                            green: 1
+                            red: 1
+                            blue: 1
+                            green: 0
                       else:
                         - logger.log: "WIFI connected"
                         - light.turn_on:
@@ -258,7 +258,27 @@ sun:
   latitude: 51.14°
   longitude: 9.414°
 
+
+switch:
+  - platform: restart
+    name: "KLD7 Restart" 
+  - platform: template
+    name: "Kontrolblinker"
+    id: blinki
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+
+
+
 binary_sensor:
+  - platform: status
+    name: "Statussensor"
+    id: statussensor
   - platform: gpio
     pin:
       number: D3
@@ -275,12 +295,24 @@ binary_sensor:
             value: 'true'
         - light.turn_off:
             id: abfallneo
-  - platform: status
-    name: "Statussensor"
-    id: statussensor
 
 
 sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
   - platform: homeassistant
     id: abfallnxta
     internal: true
