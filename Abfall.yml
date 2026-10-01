@@ -58,9 +58,25 @@ globals:
   - id: lampe
     type: bool
     initial_value: 'false'
-  - id: button
+  - id: Knopp
     type: bool
     initial_value: 'false'
+    
+    
+
+    
+    
+    
+script:
+  - id: tonne_raus
+    then:
+      - logger.log: "Tonne rausgestellt"
+      - globals.set:
+          id: Knopp
+          value: 'true'
+      - light.turn_off:
+          id: abfallneo    
+   
     
 time:
   - platform: sntp
@@ -74,7 +90,7 @@ time:
               id: lampe
               value: 'false'
           - globals.set:
-              id: button
+              id: Knopp
               value: 'false'
           - light.turn_on:
               id: abfallneo
@@ -161,7 +177,7 @@ time:
               static int colR;
               static int colG;
               static int colB;
-              ESP_LOGD("HUL1", "Tick mit Lampe %d und Button %d", id(lampe), id(button));
+              ESP_LOGD("HUL1", "Tick mit Lampe %d und Button %d", id(lampe), id(Knopp));
               heute = id(zeit).now().year * 10000 + id(zeit).now().month * 100 + id(zeit).now().day_of_month;  
               ESP_LOGD("HUL1", "Zeit %d", heute);
               ESP_LOGD("HUL1", "Sensor %f", (id(abfallnxta).state * 24) + (24 - id(zeit).now().hour));
@@ -235,7 +251,7 @@ time:
                   colG = 1;
                   colB = 1;
               }
-              if (id(lampe) and !id(button)) {
+              if (id(lampe) and !id(Knopp)) {
                   ESP_LOGD("HUL1", "Lampe an %d", lz);
                   auto call = id(abfallneo).turn_on();
                   call.set_rgb(colR, colG, colB);
@@ -261,7 +277,7 @@ sun:
 
 switch:
   - platform: restart
-    name: "KLD7 Restart" 
+    name: "Tonne Restart" 
   - platform: template
     name: "Kontrolblinker"
     id: blinki
@@ -285,16 +301,18 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "button"
+    name: "Knopp"
     internal: true
     on_press:
       then:
-        - logger.log: "button pressed"
-        - globals.set:
-            id: button
-            value: 'true'
-        - light.turn_off:
-            id: abfallneo
+        - script.execute: tonne_raus
+
+button:
+  - platform: template
+    name: "Tonne rausgestellt"
+    on_press:
+      then:
+        - script.execute: tonne_raus
 
 
 sensor:
@@ -350,5 +368,4 @@ light:
       - addressable_random_twinkle:
       - addressable_fireworks:
       - addressable_flicker:
-
 
