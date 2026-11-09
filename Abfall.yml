@@ -44,6 +44,14 @@ wifi:
 captive_portal:
 #  keep_user_credentials: true  # option nicht aktiv.
 
+web_server:
+  port: 80
+  version: 3
+  local: true              # JS/CSS in die Firmware statt vom CDN laden
+  auth:                    # optional, empfehlenswert
+    username: admin
+    password: !secret web_password
+
 ota:
   - platform: esphome
 
